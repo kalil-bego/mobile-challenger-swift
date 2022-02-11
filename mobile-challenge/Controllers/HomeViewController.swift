@@ -8,9 +8,12 @@
 import UIKit
 
 final class HomeViewController: UIViewController {
+    
+    // COMENTARIO: Tenta usar MARKS, ajuda a deixar o codigo mais organizado
 
     private let viewModel = HomeViewModel()
 
+    // COMENTARIO: Geralmente, quando é feito em view code, todos os elementos ficam em uma classe diferente, pra não misturar view com view controller. Nesse caso, essa tableview ficaria numa HomeView, junto com suas constraints. Assim você só daria view.addSubview(HomeView())
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
 
@@ -26,7 +29,7 @@ final class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = viewModel.title
-        
+        // COMENTARIO: Voce usa essa loading view em praticamente todas as suas telas e provavelmente vai usar de novo caso crie uma nova, uma dica é criar uma classe BaseViewController (exemplo de nome), onde ela é uma UIViewController que tenha a loading view. Depois disso, suas viewControllers ao inves de herdar de UIViewController, herdariam direto da BaseViewController, ex: final class HomeViewController: BaseViewController
         let loadingView = LoadingView(frame: view.frame)
         view.insertSubview(loadingView, at: 0)
         loadingView.center = view.center
@@ -80,6 +83,7 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard let repository = viewModel.repositories?[indexPath.row] else { return }
         let viewController = PullRequestViewController()
+        // COMENTARIO: Fica mais organizado se voce deixar apenas a view controller saber da existencia de sua propria viewmodel. O legal é passar os dados que a view controller precisa pra montar sua viewmodel e deixar que ela mesma monte.
         viewController.setupViewModel(PullRequestViewModel(repositoryInfo: repository))
         navigationController?.pushViewController(viewController, animated: true)
     }

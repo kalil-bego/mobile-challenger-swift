@@ -13,6 +13,7 @@ final class ErrorView: UIView {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 25, weight: .bold)
+        // COMENTARIO: no safra a gente nao implementa (eu até comecei a fazer mas vi que prro safra nao fazia sentido) mas tenta ver sobre Localizable Strings. É uma forma de guardar todas as Strings que são apresentadas pro usuario num arquivo só, e caso necessário fazer a traduçã delas pra qualquer outro idioma, assim vc teria um app universal!
         label.text = "Ops... Ocorreu um erro, tente novamente mais tarde"
         label.numberOfLines = 2
         label.textAlignment = .center

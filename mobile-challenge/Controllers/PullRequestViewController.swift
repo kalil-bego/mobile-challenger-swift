@@ -11,6 +11,7 @@ final class PullRequestViewController: UIViewController {
 
     private var viewModel: PullRequestViewModel?
     
+    // COMENTARIO: mesma coisa do comentario la na HomeViewController, vc tem view controller e view tudo num arquivo só
     private lazy var quantityPullRequest: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -32,6 +33,7 @@ final class PullRequestViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        // COMENTARIO: essa viewDidLoad ta gigaaante, tenta quebrar as coisas em funções, fica mais organizado e muuuuuito mais facil de dar manutenção
         
         view.backgroundColor = .white
         title = viewModel?.repositoryInfo?.name
@@ -65,7 +67,7 @@ final class PullRequestViewController: UIViewController {
                 
                 let openedPullRequests = self.viewModel?.openedPullRequests() ?? 0
                 let closedPullRequests = self.viewModel?.closedPullRequests() ?? 0
-                
+                // COMENTARIO: Aqui o if e o else estão na main thread, dito isso vc poderia colocar a condição inteira dentro da main thread
                 DispatchQueue.main.async {
                     self.quantityPullRequest.text = "\(openedPullRequests) opened / \(closedPullRequests) closed"
                     
@@ -112,7 +114,7 @@ extension PullRequestViewController: UITableViewDelegate, UITableViewDataSource 
         guard let pullRequest = viewModel?.pullRequests?[indexPath.row] else {
             return UITableViewCell()
         }
-        
+        // COMENTARIO: no MVVM a controller nunca deve fazer requisições, quem tem essa responsabilidade é a viewmodel
         RepositoriesManager.shared.getImageOwner(url: URL(string: pullRequest.user.picture)) { image, error in
             cell.setupCell(imageOwner: image ?? UIImage(),
                            pullRequest: PullRequest(state: pullRequest.state,

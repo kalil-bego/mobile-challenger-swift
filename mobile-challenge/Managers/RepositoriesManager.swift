@@ -12,13 +12,13 @@ final class RepositoriesManager {
     
     private let apiCaller = APICaller()
     private let decoder: JSONDecoder?
-    
+    // COMENTARIO: Geralmente se usa shaerd quando na classe existe um valor que nao podemos perder, nesse caso acho que voce nao precisaria dele. PS: eu tbm uso muito sem necessidade kkk :(
     static let shared = RepositoriesManager(decoder: JSONDecoder())
     
     init(decoder: JSONDecoder) {
         self.decoder = decoder
     }
-    
+    // COMENTARIO: Não é muuuito legal meter muita coisa (mais de 1) num escaping. Esse seu escaping poderia ser dividido em dois: success: @escaping([RepositoryInfo]) -> Void e failure(Error) -> Void. Fica muito mais organizado e na hora de usar vc nao vai precisar de 1 trilhão de ifs ou ver se o erro existe, por exemplo.
     func getRepositories(completion: @escaping([RepositoryInfo]?, Error?) -> Void) {
         guard let url = URL(string: "https://api.github.com/search/repositories?q=language:Java&sort=stars&page=1") else { return }
         let request = URLRequest(url: url)

@@ -25,11 +25,12 @@ final class PullRequestViewModel {
 
         let owner = repositoryInfo.user.username
         let repositoryName = repositoryInfo.name
+        // COMENTARIO: Uma forma mais bonitinha de concatenar string é com String(format:...), fica bem mais facil de entender
         let url = URL(string: "https://api.github.com/repos/\(owner)/\(repositoryName)/pulls")
 
         RepositoriesManager.shared.getPullRequests(url: url) { pullRequests, error in
             self.pullRequests = pullRequests
-            
+            // COMENTARIO: Aqui voce tem muitos ifs e nem ta usando o error que recebe. Acho que voce pode usar o error e o pullRequests.isEmpty dessa forma: if error != nill && pullRequests.isEmpty { completion(nil) } ou algo assim. Dessa forma vc vai de 4 condições pra 1 só
             if let pullRequests = pullRequests {
                 if pullRequests.count > 0 {
                     completion(pullRequests)
