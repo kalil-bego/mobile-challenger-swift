@@ -12,22 +12,27 @@ final class HomeViewModel {
     
     let title = "GitHub JavaPop"
     
-    var repositories: [RepositoryInfo]?
+    private var repositories: [RepositoryInfo]?
     
     func getRepositories(completion: @escaping([RepositoryInfo]?) -> Void) {
-        RepositoriesManager.shared.getRepositories { repositories, _ in
+        RepositoriesManager().getRepositories(success: { repositories in
             self.repositories = repositories
-            
-            if let repositories = repositories {
-                if repositories.count > 0 {
-                    completion(repositories)
-                } else {
-                    completion(nil)
-                }
-            } else {
-                completion(nil)
+            if !repositories.isEmpty {
+                completion(repositories)
+                return
             }
-        }
+            completion(nil)
+        }, failure: { error in
+            completion(nil)
+        })
+    }
+    
+    func getCountRepositories() -> Int {
+        repositories?.count ?? 0
+    }
+    
+    func getRepositoryByPosition(position: Int) -> RepositoryInfo? {
+        repositories?[position]
     }
     
 }

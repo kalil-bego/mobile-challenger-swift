@@ -10,8 +10,8 @@ import UIKit
 
 final class PullRequestViewModel {
     
-    let repositoryInfo: RepositoryInfo?
-    var pullRequests: [PullRequest]?
+    private let repositoryInfo: RepositoryInfo?
+    private var pullRequests: [PullRequest]?
     
     init(repositoryInfo: RepositoryInfo) {
         self.repositoryInfo = repositoryInfo
@@ -27,19 +27,18 @@ final class PullRequestViewModel {
         let repositoryName = repositoryInfo.name
         let url = URL(string: "https://api.github.com/repos/\(owner)/\(repositoryName)/pulls")
 
-        RepositoriesManager.shared.getPullRequests(url: url) { pullRequests, error in
+        RepositoriesManager().getPullRequests(url: url, success: { pullRequests in
             self.pullRequests = pullRequests
             
-            if let pullRequests = pullRequests {
-                if pullRequests.count > 0 {
-                    completion(pullRequests)
-                } else {
-                    completion(nil)
-                }
-            } else {
-                completion(nil)
+            if !pullRequests.isEmpty {
+                completion(pullRequests)
+                return
             }
-        }
+            
+            completion(nil)
+        }, failure: { error in
+            completion(nil)
+        })
     }
     
     func openedPullRequests() -> Int {
@@ -56,6 +55,26 @@ final class PullRequestViewModel {
         }
 
         return pullRequests.filter { $0.state != "open" }.count
+    }
+    
+    func getCountPullRequests() -> Int {
+        pullRequests?.count ?? 0
+    }
+    
+    func getRepositoryName() -> String {
+        repositoryInfo?.name ?? ""
+    }
+    
+    func getPullRequestByPosition(position: Int) -> PullRequest? {
+        pullRequests?[position]
+    }
+    
+    func getImage(url: URL?, completion: @escaping(UIImage) -> Void) {
+        RepositoriesManager().getImageOwner(url: url, success: { image in
+            completion(image)
+        }, failure: { error in
+            print(error)
+        })
     }
     
 }

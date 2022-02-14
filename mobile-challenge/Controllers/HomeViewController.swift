@@ -7,47 +7,25 @@
 
 import UIKit
 
-final class HomeViewController: UIViewController {
+final class HomeViewController: LoadingViewController {
 
     private let viewModel = HomeViewModel()
-
-    private lazy var tableView: UITableView = {
-        let tableView = UITableView()
-
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.register(RepositoryTableViewCell.self, forCellReuseIdentifier: "RepositoryCell")
-        tableView.rowHeight = 150
-
-        return tableView
-    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         title = viewModel.title
         
-        let loadingView = LoadingView(frame: view.frame)
-        view.insertSubview(loadingView, at: 0)
-        loadingView.center = view.center
-        
-        let errorView = ErrorView(frame: view.frame)
+        let homeView = HomeView(frame: view.frame)
+        homeView.setupTableView(delegate: self, dataSource: self)
         
         viewModel.getRepositories { repositories in
             if repositories != nil {
                 DispatchQueue.main.async {
-                    self.view.addSubview(self.tableView)
-                    NSLayoutConstraint.activate([
-                        self.tableView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-                        self.tableView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-                        self.tableView.topAnchor.constraint(equalTo: self.view.topAnchor),
-                        self.tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
-                    ])
+                    self.view.addSubview(homeView)
                 }
             } else {
                 DispatchQueue.main.async {
-                    self.view.addSubview(errorView)
-                    errorView.center = self.view.center
+                    self.view.addSubview(ErrorView(frame: self.view.frame))
                 }
             }
         }
@@ -58,7 +36,7 @@ final class HomeViewController: UIViewController {
 extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.repositories?.count ?? 0
+        return viewModel.getCountRepositories()
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -66,21 +44,27 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             return UITableViewCell()
         }
         
-        guard let repository = viewModel.repositories?[indexPath.row] else {
+        guard let repository = viewModel.getRepositoryByPosition(position: indexPath.row) else {
             return UITableViewCell()
         }
+        let url = URL(string: repository.user.picture)
         
-        RepositoriesManager.shared.getImageOwner(url: URL(string: repository.user.picture)) { image, error in
-            cell.setupCell(imageOwner: image ?? UIImage(),
+        RepositoriesManager().getImageOwner(url: url, success: { image in
+            cell.setupCell(imageOwner: image,
                            repositoryInfo: repository)
-        }
+        }, failure: { error in
+            print(error)
+        })
+
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let repository = viewModel.repositories?[indexPath.row] else { return }
+        guard let repository = viewModel.getRepositoryByPosition(position: indexPath.row) else {
+            return
+        }
         let viewController = PullRequestViewController()
-        viewController.setupViewModel(PullRequestViewModel(repositoryInfo: repository))
+        viewController.setup(repositoryInfo: repository)
         navigationController?.pushViewController(viewController, animated: true)
     }
 
